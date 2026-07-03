@@ -1,8 +1,9 @@
-Prompt #1: Emergency, I want to create a simple Website (ChatBot) Using Gemini api, for free and fast in 15 minutes (Live Homework), he'll look at the gitbuh repository, QUICK CREATE A PLAN!!!
-Prompt #2: no, I wanna push this file (app.py) into a github repository, and add the geminii api key in the secrets and quickly set it up for review with privacy (Better) Guide me, first how to get gemini API TELL ME!! also remove the (15Minute) thiing, sir will be suspicous that I completed it last minute
-Prompt #3: I forgot to add the api key while deploying in streamlit, so I went to settings and there I added the secret, and rebooted it, but... Should I add it in the repository? and btw, what's the above "Target github repository" ?? Isn't that useless piece of sh*t (With an Image)
-Prompt #4: Looks like you need more inside information, tell me which one would work!!! (With 4 photos)
-Prompt #5 (Finalizing): 
+## Prompt #1: Emergency, I want to create a simple Website (ChatBot) Using Gemini api, for free and fast in 15 minutes (Live Homework), he'll look at the gitbuh repository, QUICK CREATE A PLAN!!!
+## Prompt #2: no, I wanna push this file (app.py) into a github repository, and add the geminii api key in the secrets and quickly set it up for review with privacy (Better) Guide me, first how to get gemini API TELL ME!! also remove the (15Minute) thiing, sir will be suspicous that I completed it last minute
+## Prompt #3: I forgot to add the api key while deploying in streamlit, so I went to settings and there I added the secret, and rebooted it, but... Should I add it in the repository? and btw, what's the above "Target github repository" ?? Isn't that useless piece of sh*t (With an Image)
+## Prompt #4: Looks like you need more inside information, tell me which one would work!!! (With 4 photos)
+## Prompt #5 (Finalizing): 
+###
 ```
 This is the chat of the online class:
 ro
