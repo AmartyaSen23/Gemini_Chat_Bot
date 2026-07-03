@@ -37,5 +37,3 @@ Designed with a focus on algorithmic complexity and data science best practices,
 
 
 **Author:** Amartya Sen
-
-```
