@@ -84,8 +84,16 @@ with st.sidebar:
     st.header("⚙️ Configuration & Vision")
     st.markdown("Upload architecture diagrams, UI mockups, or error screenshots for context.")
     uploaded_image = st.file_uploader("Upload Image Context", type=["png", "jpg", "jpeg"])
-   
-    if st.button("🗑️ Clear Chat History"):
+    
+    with st.expander("📖 Guide: How to format the Repo URL"):
+        st.markdown("""
+        **Required format:** `owner/repo`
+        1. Go to your target GitHub repository.
+        2. Look at the web URL: `github.com/scikit-learn/scikit-learn`
+        3. Copy ONLY the last two parts: **`scikit-learn/scikit-learn`**
+        """)
+        
+    if st.button("🗑️ Clear Chat History", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -95,25 +103,46 @@ col1, col2 = st.columns([1, 3])
 with col1:
     st.subheader("Target Control")
     repo_input = st.text_input("Repository (owner/repo)", placeholder="e.g., scikit-learn/scikit-learn")
-   
+    
+    # Auto-scrub full URLs if the user pastes them by mistake
+    if repo_input and "github.com/" in repo_input:
+        repo_input = repo_input.split("github.com/")[-1].strip("/")
+        st.toast(f"Link detected! Auto-formatted to: {repo_input}", icon="✅")
+
     if repo_input:
-        st.subheader("System Logs")
-        with st.container(height=300):
-            if not st.session_state.repo_context:
-                with st.spinner("Initializing scraper..."):
-                    add_log(f"Initiating connection to github.com/{repo_input}")
-                    context, metrics = fetch_advanced_github_context(repo_input)
-                    if context:
-                        st.session_state.repo_context = context
-                        st.session_state.repo_metrics = metrics
-                        add_log("SUCCESS: Architecture mapped.")
-                        add_log("SUCCESS: Context injected into memory.")
-                        st.rerun()
-                    else:
-                        st.error("Failed to map repository. Check format or rate limits.")
-           
-            for log in st.session_state.action_logs:
-                st.code(log, language="bash")
+        # The Safety Catch: Check if it matches 'owner/repo' format
+        if "/" not in repo_input or len(repo_input.split("/")) != 2 or " " in repo_input:
+            st.warning("⚠️ Invalid Format Detected!")
+            st.info("Please enter a valid GitHub repository in the format `owner/repo`.\n\n**Example:** If the URL is `https://github.com/psf/requests`, just type **`psf/requests`**.")
+        else:
+            st.subheader("System Logs")
+            with st.container(height=300):
+                # Ensure we only scrape once per unique repository
+                if not st.session_state.repo_context or st.session_state.get('current_target') != repo_input:
+                    
+                    # Upgraded UI: Reactive Status Container
+                    with st.status("Initializing Advanced Scraper...", expanded=True) as status:
+                        st.write(f"📡 Initiating connection to github.com/{repo_input}")
+                        add_log(f"Connecting to github.com/{repo_input}")
+                        
+                        context, metrics = fetch_advanced_github_context(repo_input)
+                        
+                        if context:
+                            st.session_state.repo_context = context
+                            st.session_state.repo_metrics = metrics
+                            st.session_state.current_target = repo_input  # Lock the target
+                            
+                            add_log("SUCCESS: Architecture mapped.")
+                            status.update(label="Architecture mapped successfully!", state="complete", expanded=False)
+                            st.toast("Context Injected. Ready for AI Analysis.", icon="🚀")
+                            st.rerun()
+                        else:
+                            status.update(label="Scrape Failed", state="error", expanded=True)
+                            st.error("Failed to map repository. Please check the spelling or GitHub API rate limits.")
+                
+                # Render persistent logs
+                for log in st.session_state.action_logs:
+                    st.code(log, language="bash")
 
 with col2:
     if st.session_state.repo_context:
@@ -132,18 +161,19 @@ with col2:
                     st.progress(bytes_count / total_bytes, text=f"{lang} ({round((bytes_count/total_bytes)*100, 1)}%)")
        
         with tab1:
-            # Display chat history
+            # Display chat history with custom avatars
             for msg in st.session_state.messages:
-                with st.chat_message(msg["role"]):
+                avatar_icon = "👤" if msg["role"] == "user" else "🧠"
+                with st.chat_message(msg["role"], avatar=avatar_icon):
                     st.markdown(msg["content"])
 
             if prompt := st.chat_input("Ask a technical question..."):
                 # Append user prompt to UI
                 st.session_state.messages.append({"role": "user", "content": prompt})
-                with st.chat_message("user"):
+                with st.chat_message("user", avatar="👤"):
                     st.markdown(prompt)
 
-                with st.chat_message("assistant"):
+                with st.chat_message("assistant", avatar="🧠"):
                     # 1. Compile Strict System Instructions
                     sys_instruct = f"""You are a strict, elite Senior Software Engineer.
                     Your directives:
@@ -163,15 +193,15 @@ with col2:
                     # 2. Build Multimodal Content Array
                     gemini_contents = []
                     # Feed history to maintain context
-                    for m in st.session_state.messages[:-1]:
+                    for m in st.session_state.messages[:-1]: 
                         gemini_contents.append(types.Content(role=m["role"], parts=[types.Part.from_text(text=m["content"])]))
-                   
-                    # Feed current prompt + image
-                    current_parts = [types.Part.from_text(text=prompt)]
+                    
+                    # Let the SDK automatically coerce the final user turn to avoid Pydantic errors
                     if uploaded_image:
                         img = Image.open(uploaded_image)
-                        current_parts.append(img)
-                    gemini_contents.append(types.Content(role="user", parts=current_parts))
+                        gemini_contents.append([prompt, img]) # Pass raw list, SDK handles it
+                    else:
+                        gemini_contents.append(prompt) # Pass string, SDK handles it
 
                     # 3. Stream Inference (Live Typing)
                     try:
