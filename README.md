@@ -1,12 +1,3 @@
-Here is the upgraded package. To make you stand out as an AI/ML engineering student, I have completely rewritten the core engine.
-
-This upgraded `app.py` now includes **Streamlit Tabs**, **Repository Analytics** (Language breakdown), and a custom System Prompt that forces the Gemini AI to analyze the code like a Senior Machine Learning & Data Science Engineer evaluating algorithmic complexity.
-
-### 1. The Upgraded `README.md`
-
-Create a `README.md` file in your repository and paste this. It is formatted professionally and includes the image tag you requested.
-
-```markdown
 # 🤖 GitHub Codebase & Architecture Analyzer
 
 ![App Interface](https://via.placeholder.com/1000x400?text=GitHub+Codebase+Analyzer+Interface)
